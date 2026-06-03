@@ -418,6 +418,8 @@ const PRODUCTOS_DEFAULT={
   ],
   otros:[]
 };
+const SHEETS_URL='https://script.google.com/macros/s/AKfycbxUoGYxnM-1KSgVZCqtpfTs7ghYboCPWrDcfMTtH2FQ6YqOuAxutl8Z_Vs0pc8G6mMzyg/exec';
+
 const CAT_LABELS={tostadas:'Tostadas',botanas:'Botanas',sopes:'Sopes',alimentos:'Alimentos Preparados',otros:'Otros'};
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
@@ -550,8 +552,20 @@ function confirmarPedido(){
   document.getElementById('cli-tel').value='';
   document.getElementById('cli-dom').value='';
   renderCategorias();cerrarModal();
-  toast('Pedido #'+folio+(pagoSeleccionado==='credito'?' (crédito)':' (contado)')+' guardado ✓','ok');
+  toast('Pedido #'+folio+' guardado, sincronizando...','ok');
   showTab('historial');
+
+  // Enviar a Google Sheets
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(pedido)
+  }).then(()=>{
+    toast('Pedido #'+folio+' guardado y sincronizado ✓','ok');
+  }).catch(()=>{
+    toast('Pedido #'+folio+' guardado localmente (sin conexión)','');
+  });
 }
 
 // ══ HISTORIAL ══
@@ -624,7 +638,26 @@ function registrarAbono(folio){
   p.saldoPendiente=Math.max(0,p.saldoPendiente-real);
   p.abonos.push({monto:real,fecha:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})});
   DB.save(state);renderCreditos();
-  toast('Abono de $'+real.toFixed(2)+' registrado ✓','ok');
+  toast('Abono registrado, sincronizando...','ok');
+
+  // Enviar abono a Sheets
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      tipo: 'abono',
+      folio: p.folio,
+      cliente: p.nombre,
+      monto: real,
+      saldoPendiente: p.saldoPendiente,
+      fecha: new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})
+    })
+  }).then(()=>{
+    toast('Abono de $'+real.toFixed(2)+' sincronizado ✓','ok');
+  }).catch(()=>{
+    toast('Abono guardado localmente (sin conexión)','');
+  });
 }
 
 // ══ CLIENTES ══
