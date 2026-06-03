@@ -215,7 +215,7 @@ select{width:100%;background:var(--off);border:1px solid var(--teal-border);bord
     <button class="pin-btn" onclick="pinPress('0')" style="grid-column:2">0</button>
     <button class="pin-btn del" onclick="pinDel()">⌫</button>
   </div>
-  <div style="font-size:11px;color:var(--mid);margin-top:.5rem">PIN por defecto: 1234</div>
+  <div style="font-size:11px;color:var(--mid);margin-top:.5rem"></div>
 </div>
 
 <!-- HEADER -->
@@ -425,7 +425,7 @@ const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','
 
 // ══ STORAGE ══
 const DB={
-  load(){const r=localStorage.getItem('titina_pedidos_v2');return r?JSON.parse(r):{pedidos:[],catalogo:JSON.parse(JSON.stringify(PRODUCTOS_DEFAULT)),pin:'1234'}},
+  load(){const r=localStorage.getItem('titina_pedidos_v2');return r?JSON.parse(r):{pedidos:[],catalogo:JSON.parse(JSON.stringify(PRODUCTOS_DEFAULT)),pin:'8602'}},
   save(s){localStorage.setItem('titina_pedidos_v2',JSON.stringify(s))}
 };
 let state=DB.load();
