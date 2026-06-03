@@ -555,17 +555,11 @@ function confirmarPedido(){
   toast('Pedido #'+folio+' guardado, sincronizando...','ok');
   showTab('historial');
 
-  // Enviar a Google Sheets
-  fetch(SHEETS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(pedido)
-  }).then(()=>{
-    toast('Pedido #'+folio+' guardado y sincronizado ✓','ok');
-  }).catch(()=>{
-    toast('Pedido #'+folio+' guardado localmente (sin conexión)','');
-  });
+  // Enviar a Google Sheets via GET (más compatible con Apps Script)
+  const params = new URLSearchParams({data: JSON.stringify(pedido)});
+  fetch(SHEETS_URL + '?' + params.toString(), {mode:'no-cors'})
+    .then(()=>toast('Pedido #'+folio+' sincronizado ✓','ok'))
+    .catch(()=>toast('Pedido #'+folio+' guardado local (sin conexión)',''));
 }
 
 // ══ HISTORIAL ══
@@ -640,24 +634,12 @@ function registrarAbono(folio){
   DB.save(state);renderCreditos();
   toast('Abono registrado, sincronizando...','ok');
 
-  // Enviar abono a Sheets
-  fetch(SHEETS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      tipo: 'abono',
-      folio: p.folio,
-      cliente: p.nombre,
-      monto: real,
-      saldoPendiente: p.saldoPendiente,
-      fecha: new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})
-    })
-  }).then(()=>{
-    toast('Abono de $'+real.toFixed(2)+' sincronizado ✓','ok');
-  }).catch(()=>{
-    toast('Abono guardado localmente (sin conexión)','');
-  });
+  // Enviar abono a Sheets via GET
+  const abonoData = {tipo:'abono',folio:p.folio,cliente:p.nombre,monto:real,saldoPendiente:p.saldoPendiente,fecha:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})};
+  const abonoParams = new URLSearchParams({data: JSON.stringify(abonoData)});
+  fetch(SHEETS_URL + '?' + abonoParams.toString(), {mode:'no-cors'})
+    .then(()=>toast('Abono de $'+real.toFixed(2)+' sincronizado ✓','ok'))
+    .catch(()=>toast('Abono guardado local (sin conexión)',''));
 }
 
 // ══ CLIENTES ══
